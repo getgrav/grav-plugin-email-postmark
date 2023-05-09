@@ -1,0 +1,37 @@
+{
+  "name": "getgrav/email-postmark",
+  "type": "grav-plugin",
+  "description": "Postmark integration for new Email plugin",
+  "keywords": ["plugin"],
+  "homepage": "https://github.com/getgrav/grav-plugin-email-postmark",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Team Grav",
+      "email": "devs@getgrav.org",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.3.6",
+    "symfony/postmark-mailer": "^5.4"
+  },
+  "replace": {
+    "symfony/mailer": "*",
+    "symfony/http-client": "*",
+    "symfony/deprecation-contracts": "*",
+    "symfony/polyfill-php80": "*",
+    "psr/event-dispatcher": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Grav\\Plugin\\EmailPostmark\\": "classes/"
+    },
+    "classmap":  ["email-postmark.php"]
+  },
+  "config": {
+    "platform": {
+      "php": "7.3.6"
+    }
+  }
+}
