@@ -1,7 +1,7 @@
 name: Email Postmark
 slug: email-postmark
 type: plugin
-version: 1.0.0
+version: 1.0.1
 description: Postmark integration for new Email plugin
 icon: envelope
 author:
