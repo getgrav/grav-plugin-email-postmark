@@ -50,8 +50,9 @@ class EmailPostmarkPlugin extends Plugin
         $engine = $e['engine'];
         if ($engine === 'postmark') {
             $options = $this->config->get('plugins.email-postmark');
-            $dsn = "postmark+{$options['transport']}://";
-            $dsn .= urlencode($options['api_token']);
+            $transport = $options['transport'] ?? 'api';
+            $dsn = "postmark+{$transport}://";
+            $dsn .= urlencode($options['api_token'] ?? '');
             $dsn .= "@default";
             $e['dsn'] = $dsn;
             $e->stopPropagation();
