@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'getgrav/email-postmark',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => '16ca68b206a3a282f5e333f45d9099c3b3421ef2',
         'type' => 'grav-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'getgrav/email-postmark' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => '16ca68b206a3a282f5e333f45d9099c3b3421ef2',
             'type' => 'grav-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -50,9 +50,9 @@
             ),
         ),
         'symfony/postmark-mailer' => array(
-            'pretty_version' => 'v5.4.7',
-            'version' => '5.4.7.0',
-            'reference' => 'dbc83bac6fa0fe0badbf8b0f354fc65be2509545',
+            'pretty_version' => 'v5.4.35',
+            'version' => '5.4.35.0',
+            'reference' => '05de09f635cac0c434f8aa102c2ae8c919d8b7c5',
             'type' => 'symfony-mailer-bridge',
             'install_path' => __DIR__ . '/../symfony/postmark-mailer',
             'aliases' => array(),

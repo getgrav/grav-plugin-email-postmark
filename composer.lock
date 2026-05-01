@@ -8,22 +8,22 @@
     "packages": [
         {
             "name": "symfony/postmark-mailer",
-            "version": "v5.4.7",
+            "version": "v5.4.35",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/postmark-mailer.git",
-                "reference": "dbc83bac6fa0fe0badbf8b0f354fc65be2509545"
+                "reference": "05de09f635cac0c434f8aa102c2ae8c919d8b7c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/postmark-mailer/zipball/dbc83bac6fa0fe0badbf8b0f354fc65be2509545",
-                "reference": "dbc83bac6fa0fe0badbf8b0f354fc65be2509545",
+                "url": "https://api.github.com/repos/symfony/postmark-mailer/zipball/05de09f635cac0c434f8aa102c2ae8c919d8b7c5",
+                "reference": "05de09f635cac0c434f8aa102c2ae8c919d8b7c5",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2.5",
                 "psr/event-dispatcher": "^1",
-                "symfony/mailer": "^5.2.6|^6.0"
+                "symfony/mailer": "^5.4.21|^6.2.7"
             },
             "require-dev": {
                 "symfony/http-client": "^4.4|^5.0|^6.0"
@@ -54,7 +54,7 @@
             "description": "Symfony Postmark Mailer Bridge",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/postmark-mailer/tree/v5.4.7"
+                "source": "https://github.com/symfony/postmark-mailer/tree/v5.4.35"
             },
             "funding": [
                 {
@@ -70,7 +70,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-03-24T17:11:08+00:00"
+            "time": "2024-01-23T13:51:25+00:00"
         }
     ],
     "packages-dev": [],
@@ -86,5 +86,5 @@
     "platform-overrides": {
         "php": "7.3.6"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
