@@ -49,6 +49,18 @@ use Grav\Plugin\Email\Providers\WebhookRequest;
  * is treated as a hard bounce whatever its code says, because the store's own
  * suppression list should say what the provider's already does.
  *
+ * ## Nothing here is ever `dropped`
+ *
+ * The contract's sixth word is for a message the provider refused to send at
+ * all, and Postmark has no webhook for that. When a store sends to an address
+ * Postmark has suppressed, the API answers the send itself with a 406 and an
+ * `InactiveRecipient` error, no message is created, and no bounce record and no
+ * webhook ever follow. So the refusal reaches a store as a failed send rather
+ * than as a delivery report, and there is nothing to map: a `SubscriptionChange`
+ * is Postmark's own suppression list changing rather than something that
+ * happened to a message, and every `Bounce` record here is a receiving server's
+ * answer to a message that really was sent.
+ *
  * ## Correlation
  *
  * Postmark's `MessageID` is Postmark's own UUID. It is not the store's
@@ -156,7 +168,7 @@ final class PostmarkReports implements DeliveryReports
 
     public function sendHeader(): string
     {
-        return SendId::HEADER;
+        return SendId::header();
     }
 
     // ------------------------------------------------------------- internals

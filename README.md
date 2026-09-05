@@ -38,7 +38,7 @@ Then set the Email plugin's Mail Engine to **Postmark**.
 
 ## Delivery reports
 
-Postmark can post back what happened to every message — delivered, bounced, marked as spam, opened, clicked — and this plugin knows how to read those posts. An add-on that keeps a mailing list, such as the KahunaCart newsletter, asks the Email plugin for a provider, gets this one, and from then on a bounce lands on the right address in the store's own records without anybody copying anything between two dashboards. Nothing here posts anything anywhere on its own: this plugin reads what arrives and answers the questions an add-on asks.
+Postmark can post back what happened to every message — delivered, bounced, marked as spam, opened, clicked — and this plugin knows how to read those posts. There is no report for a message Postmark refused to send: an address on Postmark's suppression list is refused by the send itself, with a 406 and an `InactiveRecipient` error, and no webhook follows. An add-on that keeps a mailing list, such as the KahunaCart newsletter, asks the Email plugin for a provider, gets this one, and from then on a bounce lands on the right address in the store's own records without anybody copying anything between two dashboards. Nothing here posts anything anywhere on its own: this plugin reads what arrives and answers the questions an add-on asks.
 
 **What a store gets once it is set up.** Bounces suppress the address that bounced, so a campaign stops trying to reach it. Spam complaints do the same. Deliveries, opens and clicks fill in the figures on a campaign. Without a webhook, a store can tell you a campaign was sent and nothing at all about what happened to it.
 
@@ -48,7 +48,7 @@ Postmark can post back what happened to every message — delivered, bounced, ma
 
 **Postmark does not sign its webhooks**, and says so. So there is no signing key to paste. What protects the address is the long random secret in it, and the basic auth pair if you set one. Both are worth having; either on its own is reasonable.
 
-**Tying a bounce back to the exact message.** Postmark returns no headers in any of its webhooks, on any record type, and there is no setting that turns them on. What it does return is metadata, and on the **SMTP** transport a header named `X-PM-Metadata-KahunaCart-Send` becomes metadata that comes back on every event. On the **API** transport that header is sent as an ordinary header and does not become metadata, so a store that wants events tied to a particular send should set Transport to SMTP. Everything else works the same either way.
+**Tying a bounce back to the exact message.** Postmark returns no headers in any of its webhooks, on any record type, and there is no setting that turns them on. What it does return is metadata, and on the **SMTP** transport a header named `X-PM-Metadata-Grav-Send-Id` becomes metadata that comes back on every event. On the **API** transport that header is sent as an ordinary header and does not become metadata, so a store that wants events tied to a particular send should set Transport to SMTP. Everything else works the same either way.
 
 ## Deliverability
 

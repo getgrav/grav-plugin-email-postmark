@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\EmailPostmark\Tests\Unit;
 
 use Grav\Plugin\Email\Providers\Event;
+use Grav\Plugin\Email\Providers\SendHeader;
 use Grav\Plugin\Email\Providers\WebhookRequest;
 use Grav\Plugin\EmailPostmark\Provider\PostmarkReports;
 use PHPUnit\Framework\TestCase;
@@ -145,7 +146,7 @@ final class PostmarkParserTest extends TestCase
             'MessageID' => 'postmarks-own-uuid',
             'Recipient' => 'a@example.com',
             'DeliveredAt' => '2026-09-04T10:00:00.0000000Z',
-            'Metadata' => ['KahunaCart-Send' => '41'],
+            'Metadata' => ['Grav-Send-Id' => '41'],
         ]);
 
         $event = (new PostmarkReports())->parse(self::request($body))->events[0];
@@ -172,7 +173,7 @@ final class PostmarkParserTest extends TestCase
                 'RecordType' => 'Delivery',
                 'Recipient' => 'a@example.com',
                 'DeliveredAt' => '2026-09-04T10:00:00.0000000Z',
-                'Metadata' => ['KahunaCart-Send' => $stamped],
+                'Metadata' => ['Grav-Send-Id' => $stamped],
             ]);
 
             $event = (new PostmarkReports())->parse(self::request($body))->events[0];
@@ -302,7 +303,65 @@ final class PostmarkParserTest extends TestCase
     /** The header a store stamps a send id into, which for Postmark is a metadata header. */
     public function testTheSendHeaderIsPostmarksMetadataHeader(): void
     {
-        self::assertSame('X-PM-Metadata-KahunaCart-Send', (new PostmarkReports())->sendHeader());
+        self::assertSame(SendHeader::metadataHeader(), (new PostmarkReports())->sendHeader());
+        self::assertSame('X-PM-Metadata-Grav-Send-Id', (new PostmarkReports())->sendHeader());
+    }
+
+    /**
+     * A site that renames the header renames the metadata key with it.
+     *
+     * Both come out of the same call, so there is no second place to remember.
+     */
+    public function testRenamingTheHeaderRenamesTheMetadataKeyAndWhatIsReadBack(): void
+    {
+        SendHeader::override('X-Shop-Send');
+
+        try {
+            self::assertSame('X-PM-Metadata-Shop-Send', (new PostmarkReports())->sendHeader());
+
+            $body = (string)json_encode([
+                'RecordType' => 'Delivery',
+                'Recipient' => 'a@example.com',
+                'DeliveredAt' => '2026-09-05T10:00:00Z',
+                'Metadata' => ['Shop-Send' => 'abc-123'],
+            ]);
+
+            $event = (new PostmarkReports())->parse(self::request($body))->events[0];
+
+            self::assertSame('abc-123', $event->sendId);
+        } finally {
+            SendHeader::override(null);
+        }
+    }
+
+    /**
+     * Postmark never reports a message it refused to send, so `dropped` is not
+     * among what it can report.
+     *
+     * A send to an address Postmark has suppressed is refused by the send
+     * itself, with a 406 and an `InactiveRecipient` error; no message is
+     * created and no webhook follows. There is nothing to map, and claiming
+     * otherwise would tell a screen this provider can report something it
+     * cannot.
+     */
+    public function testAMessagePostmarkRefusedToSendIsNotReportedAtAll(): void
+    {
+        self::assertNotContains(Event::DROPPED, (new PostmarkReports())->events());
+
+        // Their own suppression list changing is not something that happened to
+        // a message, and the setup button turns it off for that reason.
+        $body = (string)json_encode([
+            'RecordType' => 'SubscriptionChange',
+            'Recipient' => 'a@example.com',
+            'SuppressSending' => true,
+            'SuppressionReason' => 'ManualSuppression',
+        ]);
+
+        $payload = (new PostmarkReports())->parse(self::request($body));
+
+        self::assertTrue($payload->isEmpty());
+        self::assertFalse($payload->unreadable);
+        self::assertStringContainsString('does not act on', $payload->note);
     }
 
     // ------------------------------------------------------------- internals

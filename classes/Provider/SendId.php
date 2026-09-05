@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\EmailPostmark\Provider;
 
+use Grav\Plugin\Email\Providers\SendHeader;
+
 /**
  * The store's send id, going out on a message and coming back in a webhook.
  *
@@ -18,12 +20,17 @@ namespace Grav\Plugin\EmailPostmark\Provider;
  * `X-PM-Metadata-<key>`. Postmark strips its own metadata header before the
  * message reaches the recipient and hands the value back under
  * `Metadata.<key>`. So a store that wants a bounce tied to the exact message it
- * came from sets `X-PM-Metadata-KahunaCart-Send` beside the plain
- * `X-KahunaCart-Send` that the five providers which do echo headers read, and
+ * came from sets {@see SendHeader::metadataHeader()} beside the ordinary
+ * {@see SendHeader::name()} that the providers which do echo headers read, and
  * this reads it back out of `Metadata`.
  *
- * Postmark's metadata keys are capped at twenty characters, which
- * `KahunaCart-Send` at fifteen fits with room to spare.
+ * ## The name is the Email plugin's, not this plugin's
+ *
+ * `SendHeader::name()` is `X-Grav-Send-Id` unless the site says otherwise, and
+ * the metadata key is that name with its leading `X-` taken off and capped at
+ * the twenty characters Postmark allows — `Grav-Send-Id`, comfortably inside
+ * it. Both ends derive it from the same call, so a site that renames the header
+ * renames the metadata key with it and nothing has to be told twice.
  *
  * ## The API transport is not the SMTP transport
  *
@@ -43,22 +50,20 @@ namespace Grav\Plugin\EmailPostmark\Provider;
  */
 final class SendId
 {
-    /**
-     * The header the five providers that echo headers read.
-     *
-     * Postmark is not one of them. It is here because it is half of the pair
-     * and because {@see PostmarkProvider::instructions()} names both.
-     */
-    public const PLAIN_HEADER = 'X-KahunaCart-Send';
-
-    /** The metadata key Postmark hands back, without its `X-PM-Metadata-` prefix. */
-    public const METADATA_KEY = 'KahunaCart-Send';
-
-    /** The header that puts it there on a message sent over SMTP. */
-    public const HEADER = 'X-PM-Metadata-' . self::METADATA_KEY;
-
     private function __construct()
     {
+    }
+
+    /** The metadata key Postmark hands back, without its `X-PM-Metadata-` prefix. */
+    public static function metadataKey(): string
+    {
+        return SendHeader::metadataKey();
+    }
+
+    /** The header that puts it there on a message sent over SMTP. */
+    public static function header(): string
+    {
+        return SendHeader::metadataHeader();
     }
 
     /**
@@ -66,35 +71,16 @@ final class SendId
      *
      * Postmark keeps metadata keys as they were written, but a store that set
      * the header by hand may well have lower-cased it, so both are tried before
-     * giving up. Anything that is not an array — the key absent, or `Metadata`
-     * arriving as `[]` from a message that carried none — answers null.
+     * giving up. The plain header name is tried too, for a store whose metadata
+     * was set by something that used it. Anything that is not an array — the
+     * key absent, or `Metadata` arriving as `[]` from a message that carried
+     * none — answers null.
      *
      * @param mixed $metadata anything; a non-array answers null
      */
     public static function in(mixed $metadata): ?string
     {
-        if (!\is_array($metadata)) {
-            return null;
-        }
-
-        foreach ([self::METADATA_KEY, strtolower(self::METADATA_KEY), self::PLAIN_HEADER, strtolower(self::PLAIN_HEADER)] as $key) {
-            if (!\array_key_exists($key, $metadata)) {
-                continue;
-            }
-
-            $value = $metadata[$key];
-
-            if (!\is_string($value) && !\is_int($value) && !\is_float($value)) {
-                continue;
-            }
-
-            $value = trim((string)$value);
-
-            if ($value !== '') {
-                return $value;
-            }
-        }
-
-        return null;
+        return SendHeader::idIn($metadata, self::metadataKey())
+            ?? SendHeader::idIn($metadata);
     }
 }

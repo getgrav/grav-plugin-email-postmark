@@ -81,7 +81,7 @@ final class PostmarkProviderTest extends TestCase
     {
         $note = (new PostmarkProvider())->capabilities()->echoNote;
 
-        self::assertStringContainsString('X-PM-Metadata-KahunaCart-Send', $note);
+        self::assertStringContainsString('X-PM-Metadata-Grav-Send-Id', $note);
         self::assertStringContainsString('SMTP', $note, 'the API transport does not turn that header into metadata');
         self::assertStringEndsWith('.', $note);
     }

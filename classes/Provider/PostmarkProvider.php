@@ -92,8 +92,8 @@ final class PostmarkProvider implements Provider
             unsubscribeHeaders: true,
             echoesHeaders: false,
             echoNote: 'Postmark returns no headers in its webhooks, so a send id has to travel as metadata instead. '
-                . 'On the SMTP transport a header named ' . SendId::HEADER . ' becomes metadata and comes back under '
-                . SendId::METADATA_KEY . '. On the API transport that header is sent as an ordinary header and does not '
+                . 'On the SMTP transport a header named ' . SendId::header() . ' becomes metadata and comes back under '
+                . SendId::metadataKey() . '. On the API transport that header is sent as an ordinary header and does not '
                 . 'become metadata, so switch this plugin to SMTP if you want bounces tied to the exact message they came from.',
         );
     }
