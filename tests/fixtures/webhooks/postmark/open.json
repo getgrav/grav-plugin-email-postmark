@@ -1,0 +1,36 @@
+{
+  "RecordType": "Open",
+  "MessageStream": "outbound",
+  "FirstOpen": true,
+  "Client": {
+    "Name": "Chrome 140.0.7339.80",
+    "Company": "Google",
+    "Family": "Chrome"
+  },
+  "OS": {
+    "Name": "macOS 26 Tahoe",
+    "Company": "Apple Computer, Inc.",
+    "Family": "macOS"
+  },
+  "Platform": "WebMail",
+  "UserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.80 Safari/537.36",
+  "ReadSeconds": 5,
+  "Geo": {
+    "CountryISOCode": "US",
+    "Country": "United States",
+    "RegionISOCode": "TX",
+    "Region": "Texas",
+    "City": "Houston",
+    "Zip": "77058",
+    "Coords": "29.5502,-95.0973",
+    "IP": "203.0.113.42"
+  },
+  "MessageID": "883953f4-6105-42a2-a16a-77a8eac79483",
+  "Metadata": {
+    "PropA": "some value",
+    "PropB": "some value"
+  },
+  "ReceivedAt": "2026-11-05T16:33:54.9070259Z",
+  "Tag": "welcome-email",
+  "Recipient": "margareth@nasa.com"
+}

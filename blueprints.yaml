@@ -1,7 +1,7 @@
 name: Email Postmark
 slug: email-postmark
 type: plugin
-version: 1.1.0
+version: 1.2.0
 description: Postmark integration for new Email plugin
 icon: envelope
 author:
@@ -46,6 +46,35 @@ form:
     api_token:
       type: text
       label: API Token
+      help: The server token, from the Postmark server this site sends through — open that server, then its API Tokens tab. It sends the mail and it creates the delivery webhook. The account token from Account → API Tokens is a different credential and will not work here.
       validate:
         required: true
+
+    message_stream:
+      type: text
+      size: small
+      label: Message Stream
+      placeholder: outbound
+      help: The Postmark stream messages leave on, and the one the delivery webhook is created on. Leave it empty unless the store sends on a stream of its own — Postmark calls the default one "outbound".
+
+    delivery_reports_section:
+      type: section
+      title: Delivery Reports
+      underline: true
+      text: Postmark can post back what happened to every message — delivered, bounced, marked as spam, opened, clicked — to an address an add-on such as the KahunaCart newsletter gives you. Postmark does not sign those posts, so the two fields below are how the site can tell a real one from a forgery. Set them here and press Set up on the add-on's own screen, and this plugin will create the webhook and put the same pair on it.
+
+    basic_user:
+      type: text
+      label: Webhook Username
+      help: The username on the webhook's Basic auth, in Postmark under the server's Webhooks tab. Anything you like — it is checked, not looked up. Leave both this and the password empty and the secret in the webhook address is the whole of the protection, which is what Postmark's own guidance suggests.
+
+    basic_password:
+      type: password
+      label: Webhook Password
+      help: The password that goes with the username above. Stored in this plugin's own config, beside the sending token.
+
+    account_token:
+      type: password
+      label: Account Token
+      help: Optional, and only for the deliverability checks. From Account → API Tokens in Postmark, which is a different screen from the server tokens above. With one, a site can read back the DKIM selector and return path Postmark has on file for a sending domain instead of asking you to find them. Without one, everything else still works.
 
