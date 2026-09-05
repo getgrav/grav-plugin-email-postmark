@@ -1,3 +1,7 @@
 enabled: true
 transport: api
 api_token:
+message_stream: outbound
+account_token:
+basic_user:
+basic_password:

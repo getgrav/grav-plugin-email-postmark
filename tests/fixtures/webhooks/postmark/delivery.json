@@ -1,0 +1,14 @@
+{
+  "RecordType": "Delivery",
+  "MessageStream": "outbound",
+  "ServerID": 23,
+  "MessageID": "883953f4-6105-42a2-a16a-77a8eac79483",
+  "Recipient": "margareth@nasa.com",
+  "Tag": "welcome-email",
+  "DeliveredAt": "2026-11-05T16:33:54.9070259Z",
+  "Details": "250 2.0.0 OK  1762360434 x12-20020a05 - gsmtp",
+  "Metadata": {
+    "PropA": "some value",
+    "PropB": "some value"
+  }
+}
