@@ -38,6 +38,15 @@ use Grav\Plugin\EmailPostmark\Api\PostmarkApi;
  * in place rather than added beside. Postmark will happily hold several
  * webhooks on one stream and post every event to all of them, and a store that
  * pressed the button twice would then record everything twice.
+ *
+ * ## Pressing it after the secret changed
+ *
+ * A new secret is a new address, so the webhook Postmark holds is posting at
+ * one that answers 404 and the store looks as though nothing is registered. It
+ * is still recognisably this store's webhook: the URL sits under the same
+ * endpoint on the same stream and only the secret on the end is different. So
+ * it is updated to the new address rather than left dead beside a new one, and
+ * the result says so.
  */
 final class PostmarkSetup implements WebhookSetup
 {

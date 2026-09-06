@@ -1,3 +1,9 @@
+# v1.2.1
+## 09/05/2026
+
+1. [](#bugfix)
+    * **Set up now repairs a webhook whose address has changed.** A store that generated a new secret, or lost its settings, was told nothing was registered while Postmark still held a webhook at the old address, and pressing Set up added a second one beside the dead one so every event arrived twice. Set up now recognises the store's own webhook by its endpoint on the same message stream and points it at the new address, with the same triggers and basic auth set on it.
+
 # v1.2.0
 ## 09/05/2026
 
