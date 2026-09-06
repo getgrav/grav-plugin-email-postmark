@@ -77,7 +77,10 @@ final class PostmarkApi
      *
      * Pressing the button twice must not leave a store with two webhooks
      * posting the same events at the same address, so the existing ones are
-     * listed first and one already pointed at this URL is updated in place.
+     * listed first and one already pointed at this URL is updated in place. The
+     * same listing catches this store's webhook registered before the secret
+     * changed, which is updated to the new address rather than joined by a
+     * second one.
      *
      * @param list<string> $triggers Postmark's own trigger names
      * @param array{user?: string, password?: string} $auth basic auth to set on
@@ -103,7 +106,7 @@ final class PostmarkApi
             return self::no('there is no webhook address to register yet');
         }
 
-        $existing = $this->existingWebhookId($serverToken, $url, $stream);
+        $existing = $this->existingWebhook($serverToken, $url, $stream);
         if ($existing['error'] !== null) {
             return self::no($existing['error']);
         }
@@ -139,11 +142,15 @@ final class PostmarkApi
         return [
             'ok' => true,
             'id' => $newId,
-            'message' => $id === null
-                ? ($newId === null
-                    ? sprintf('The webhook was created in Postmark on the %s stream.', $stream)
-                    : sprintf('The webhook was created in Postmark as number %s, on the %s stream.', $newId, $stream))
-                : sprintf('The webhook already at that address was updated in Postmark, as number %s.', (string)$id),
+            'message' => match (true) {
+                $id === null && $newId === null => sprintf('The webhook was created in Postmark on the %s stream.', $stream),
+                $id === null => sprintf('The webhook was created in Postmark as number %s, on the %s stream.', (string)$newId, $stream),
+                $existing['stale'] => sprintf(
+                    'Postmark had this store\'s webhook registered with an older secret. Number %s now points at this address.',
+                    (string)$id
+                ),
+                default => sprintf('The webhook already at that address was updated in Postmark, as number %s.', (string)$id),
+            },
         ];
     }
 
@@ -224,11 +231,21 @@ final class PostmarkApi
     // ------------------------------------------------------------- internals
 
     /**
-     * The id of a webhook already pointed at this address on this stream.
+     * The webhook on this stream worth writing to: the one already pointed at
+     * this address, or failing that this store's own against an older secret.
      *
-     * @return array{id: string|null, error: string|null}
+     * A webhook address is the store's endpoint followed by a secret, so a
+     * webhook under the same endpoint but not at the whole address is this
+     * store's own registered before the secret changed. It is answered as
+     * `stale`, and updating it is better than creating a second one: the old
+     * address answers 404, and Postmark would post every event to both.
+     *
+     * The list is read once and looked through twice, exactly first and then by
+     * endpoint, so Postmark is asked one question per press.
+     *
+     * @return array{id: string|null, stale: bool, error: string|null}
      */
-    private function existingWebhookId(string $serverToken, string $url, string $stream): array
+    private function existingWebhook(string $serverToken, string $url, string $stream): array
     {
         $answer = $this->http->json(
             'GET',
@@ -239,16 +256,39 @@ final class PostmarkApi
 
         $refusal = self::refusal($answer);
         if ($refusal !== null) {
-            return ['id' => null, 'error' => $refusal];
+            return ['id' => null, 'stale' => false, 'error' => $refusal];
         }
 
+        $endpoint = self::endpointOf($url);
+        $stale = null;
+
         foreach ((array)($answer['body']['Webhooks'] ?? []) as $hook) {
-            if (\is_array($hook) && trim((string)($hook['Url'] ?? '')) === $url) {
-                return ['id' => self::stringOrNull($hook['ID'] ?? null), 'error' => null];
+            if (!\is_array($hook)) {
+                continue;
+            }
+
+            $theirs = trim((string)($hook['Url'] ?? ''));
+            if ($theirs === $url) {
+                return ['id' => self::stringOrNull($hook['ID'] ?? null), 'stale' => false, 'error' => null];
+            }
+
+            if ($stale === null && $endpoint !== '' && str_starts_with($theirs, $endpoint)) {
+                $stale = self::stringOrNull($hook['ID'] ?? null);
             }
         }
 
-        return ['id' => null, 'error' => null];
+        return ['id' => $stale, 'stale' => $stale !== null, 'error' => null];
+    }
+
+    /**
+     * The address without its secret: everything up to and including the last
+     * slash. Two addresses that share it belong to the same store.
+     */
+    private static function endpointOf(string $url): string
+    {
+        $cut = strrpos($url, '/');
+
+        return $cut === false || $cut < \strlen('https://x/') ? '' : substr($url, 0, $cut + 1);
     }
 
     /**

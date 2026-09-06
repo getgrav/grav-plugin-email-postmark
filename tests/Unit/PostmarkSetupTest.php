@@ -156,6 +156,59 @@ final class PostmarkSetupTest extends TestCase
         self::assertSame(PostmarkApi::BASE . '/webhooks/99', $update['url']);
     }
 
+    /**
+     * A webhook registered against an older secret is pointed at the new
+     * address rather than left dead beside a new one.
+     */
+    public function testAWebhookOnAnOlderSecretIsPointedAtTheNewAddress(): void
+    {
+        $http = new FakeHttp([
+            ['status' => 200, 'body' => ['Webhooks' => [
+                ['ID' => 42, 'Url' => 'https://elsewhere.example.com/hook'],
+                ['ID' => 99, 'Url' => 'https://shop.example.com/newsletter/webhook/postmark/the-old-secret'],
+            ]]],
+            ['status' => 200, 'body' => ['ID' => 99]],
+        ]);
+
+        $result = self::button($http, 'hooks', 'a-long-password')->create(self::URL, self::EVENTS, []);
+
+        self::assertTrue($result->ok);
+        self::assertSame('99', $result->webhookId);
+        self::assertStringContainsString('older secret', $result->message);
+        self::assertCount(2, $http->calls, 'nothing should have been created');
+
+        $update = $http->call(1);
+        self::assertSame('PUT', $update['method']);
+        self::assertSame(PostmarkApi::BASE . '/webhooks/99', $update['url']);
+        self::assertSame(self::URL, $update['body']['Url']);
+        self::assertSame('outbound', $update['body']['MessageStream']);
+        self::assertSame(['Username' => 'hooks', 'Password' => 'a-long-password'], $update['body']['HttpAuth']);
+
+        foreach (['Delivery', 'Bounce', 'SpamComplaint', 'Open', 'Click'] as $on) {
+            self::assertTrue($update['body']['Triggers'][$on]['Enabled'], $on);
+        }
+
+        self::assertFalse($update['body']['Triggers']['SubscriptionChange']['Enabled']);
+    }
+
+    /** A refused repointing comes back in Postmark's own words. */
+    public function testARefusedRepointingIsAPlainSentence(): void
+    {
+        $http = new FakeHttp([
+            ['status' => 200, 'body' => ['Webhooks' => [
+                ['ID' => 99, 'Url' => 'https://shop.example.com/newsletter/webhook/postmark/the-old-secret'],
+            ]]],
+            ['status' => 422, 'body' => ['ErrorCode' => 402, 'Message' => 'The webhook could not be updated']],
+        ]);
+
+        $result = self::button($http)->create(self::URL, self::EVENTS, []);
+
+        self::assertFalse($result->ok);
+        self::assertStringContainsString('could not be updated', $result->message);
+        self::assertStringEndsWith('.', $result->message);
+        self::assertNull($result->webhookId);
+    }
+
     /** A store on its own stream gets its webhook on that stream, not on `outbound`. */
     public function testItCreatesTheWebhookOnTheStreamTheStoreSendsOn(): void
     {
