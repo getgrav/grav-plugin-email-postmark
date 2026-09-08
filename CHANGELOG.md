@@ -2,6 +2,7 @@
 ## 09/08/2026
 
 1. [](#improved)
+    * **Postmark says it does not sign its webhooks, instead of leaving it to be guessed.** Whether a provider signs was inferred from whether it asks for a verification key, and this one asks for a Basic auth pair it does not require — Postmark signs nothing, and its own guidance is that the secret in the webhook address is enough. A store that took that advice and left the pair empty was told its card needed a key and that every event would be refused, while `verify()` was answering `unsigned` and accepting every one of them
     * **The setup card says where a sending domain is verified, because it is not where anything else is.** Everything else this card asks for lives inside one Postmark server — the token, the webhook, the basic auth pair — and Sender Signatures does not: it is on the account, shared by every server. So a merchant who has just pasted a server token and gone looking for domains in the same place does not find them, which is exactly the moment the card was being read. One sentence, pointing at Sender Signatures and saying it is on the account
 
 # v1.2.1

@@ -95,6 +95,14 @@ final class PostmarkProvider implements Provider
                 . 'On the SMTP transport a header named ' . SendId::header() . ' becomes metadata and comes back under '
                 . SendId::metadataKey() . '. On the API transport that header is sent as an ordinary header and does not '
                 . 'become metadata, so switch this plugin to SMTP if you want bounces tied to the exact message they came from.',
+            // Postmark signs nothing. It offers Basic auth on the webhook and
+            // its own guidance is that the secret in the address is enough, so
+            // the pair this plugin asks for is optional — set it and it is
+            // checked, leave it and every event is still accepted. Without this
+            // the flag is inferred from "has verification keys", and a store
+            // that took Postmark's advice was told in red that every event
+            // would be refused.
+            signsWebhooks: false,
         );
     }
 
