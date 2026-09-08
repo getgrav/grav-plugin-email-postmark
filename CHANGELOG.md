@@ -1,3 +1,9 @@
+# v1.2.2
+## 09/08/2026
+
+1. [](#improved)
+    * **The setup card says where a sending domain is verified, because it is not where anything else is.** Everything else this card asks for lives inside one Postmark server — the token, the webhook, the basic auth pair — and Sender Signatures does not: it is on the account, shared by every server. So a merchant who has just pasted a server token and gone looking for domains in the same place does not find them, which is exactly the moment the card was being read. One sentence, pointing at Sender Signatures and saying it is on the account
+
 # v1.2.1
 ## 09/05/2026
 

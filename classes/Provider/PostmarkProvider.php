@@ -161,7 +161,9 @@ final class PostmarkProvider implements Provider
             . 'Paste the address above into the Webhook URL box, tick Delivery, Bounce, Spam complaint, Open and Click, '
             . 'and save. If you set a username and password under Basic auth on that screen, put the same pair into this '
             . "plugin's own settings so the store can check them. Postmark does not sign its webhooks, so those two "
-            . 'fields and the secret in the address are the whole of the protection.';
+            . 'fields and the secret in the address are the whole of the protection. '
+            . 'Being allowed to send at all is a separate thing and is not on the server: add your sending domain '
+            . 'under Sender Signatures, which is on your Postmark account rather than inside any one server.';
     }
 
     // ------------------------------------------------------------- internals
