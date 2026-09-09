@@ -95,6 +95,14 @@ final class PostmarkProvider implements Provider
                 . 'On the SMTP transport a header named ' . SendId::header() . ' becomes metadata and comes back under '
                 . SendId::metadataKey() . '. On the API transport that header is sent as an ordinary header and does not '
                 . 'become metadata, so switch this plugin to SMTP if you want bounces tied to the exact message they came from.',
+            // Postmark signs nothing. It offers Basic auth on the webhook and
+            // its own guidance is that the secret in the address is enough, so
+            // the pair this plugin asks for is optional — set it and it is
+            // checked, leave it and every event is still accepted. Without this
+            // the flag is inferred from "has verification keys", and a store
+            // that took Postmark's advice was told in red that every event
+            // would be refused.
+            signsWebhooks: false,
         );
     }
 
@@ -161,7 +169,9 @@ final class PostmarkProvider implements Provider
             . 'Paste the address above into the Webhook URL box, tick Delivery, Bounce, Spam complaint, Open and Click, '
             . 'and save. If you set a username and password under Basic auth on that screen, put the same pair into this '
             . "plugin's own settings so the store can check them. Postmark does not sign its webhooks, so those two "
-            . 'fields and the secret in the address are the whole of the protection.';
+            . 'fields and the secret in the address are the whole of the protection. '
+            . 'Being allowed to send at all is a separate thing and is not on the server: add your sending domain '
+            . 'under Sender Signatures, which is on your Postmark account rather than inside any one server.';
     }
 
     // ------------------------------------------------------------- internals
