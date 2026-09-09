@@ -44,7 +44,7 @@ form:
         smtp: SMTP
 
     api_token:
-      type: text
+      type: password
       label: API Token
       help: The server token, from the Postmark server this site sends through — open that server, then its API Tokens tab. It sends the mail and it creates the delivery webhook. The account token from Account → API Tokens is a different credential and will not work here.
       validate:
